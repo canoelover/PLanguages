@@ -1,37 +1,21 @@
-﻿//
-// This file has been generated automatically by MonoDevelop to store outlets and
-// actions made in the Xcode designer. If it is removed, they will be lost.
-// Manual changes to this file may not be handled correctly.
+// WARNING
 //
-using System.CodeDom.Compiler;
-
+// This file has been generated automatically by Xamarin Studio from the outlets and
+// actions declared in your storyboard file.
+// Manual changes to this file will not be maintained.
+//
 using Foundation;
+using System;
+using System.CodeDom.Compiler;
+using UIKit;
 
 namespace PLanguages_IOS
 {
 	[Register ("DetailViewController")]
 	partial class DetailViewController
 	{
-		[Outlet]
-		[GeneratedCodeAttribute ("iOS Designer", "1.0")]
-		UIKit.UILabel detailDescriptionLabel { get; set; }
-
-		[Outlet]
-		[GeneratedCodeAttribute ("iOS Designer", "1.0")]
-		UIKit.UIToolbar toolbar { get; set; }
-
 		void ReleaseDesignerOutlets ()
 		{
-			if (detailDescriptionLabel != null) {
-				detailDescriptionLabel.Dispose ();
-				detailDescriptionLabel = null;
-			}
-			
-			if (toolbar != null) {
-				toolbar.Dispose ();
-				toolbar = null;
-			}
 		}
 	}
 }
-
