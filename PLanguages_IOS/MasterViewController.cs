@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UIKit;
 using Foundation;
 using CoreGraphics;
+using System.Xml;
 
 namespace PLanguages_IOS
 {
@@ -11,11 +12,11 @@ namespace PLanguages_IOS
 	{
 		public DetailViewController DetailViewController { get; set; }
 
-		DataSource dataSource;
+		private DataSource dataSource;
 
 		public MasterViewController (IntPtr handle) : base (handle)
 		{
-			Title = NSBundle.MainBundle.LocalizedString ("Master", "Master");
+			Title = NSBundle.MainBundle.LocalizedString ("Computer Languages", "Languages");
 			
 			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad) {
 				PreferredContentSize = new CGSize (320f, 600f);
@@ -30,9 +31,9 @@ namespace PLanguages_IOS
 			// Perform any additional setup after loading the view, typically from a nib.
 			NavigationItem.LeftBarButtonItem = EditButtonItem;
 
-			var addButton = new UIBarButtonItem (UIBarButtonSystemItem.Add, AddNewItem);
-			addButton.AccessibilityLabel = "addButton";
-			NavigationItem.RightBarButtonItem = addButton;
+//			var addButton = new UIBarButtonItem (UIBarButtonSystemItem.Add, AddNewItem);
+//			addButton.AccessibilityLabel = "addButton";
+//			NavigationItem.RightBarButtonItem = addButton;
 
 			DetailViewController = (DetailViewController)((UINavigationController)SplitViewController.ViewControllers [1]).TopViewController;
 
@@ -45,86 +46,133 @@ namespace PLanguages_IOS
 			// Release any cached data, images, etc that aren't in use.
 		}
 
-		void AddNewItem (object sender, EventArgs args)
-		{
-			dataSource.Objects.Insert (0, DateTime.Now);
-
-			using (var indexPath = NSIndexPath.FromRowSection (0, 0))
-				TableView.InsertRows (new [] { indexPath }, UITableViewRowAnimation.Automatic);
-		}
+		//		void AddNewItem (object sender, EventArgs args)
+		//		{
+		//			dataSource.Objects.Insert (0, DateTime.Now);
+		//
+		//			using (var indexPath = NSIndexPath.FromRowSection (0, 0))
+		//				TableView.InsertRows (new [] { indexPath }, UITableViewRowAnimation.Automatic);
+		//		}
 
 		public override void PrepareForSegue (UIStoryboardSegue segue, NSObject sender)
 		{
 			if (segue.Identifier == "showDetail") {
+
 				var indexPath = TableView.IndexPathForSelectedRow;
-				var item = dataSource.Objects [indexPath.Row];
+				var item = dataSource.GetItem (indexPath.Row);
 				var controller = (DetailViewController)((UINavigationController)segue.DestinationViewController).TopViewController;
 				controller.SetDetailItem (item);
 				controller.NavigationItem.LeftBarButtonItem = SplitViewController.DisplayModeButtonItem;
 				controller.NavigationItem.LeftItemsSupplementBackButton = true;
+
+
+
 			}
 		}
 
-		class DataSource : UITableViewSource
+	}
+
+
+	//==                          DataSource                            ==
+
+
+
+	/// <summary>
+	/// Data source class.  
+	/// </summary>
+	class DataSource : UITableViewSource
+	{
+		string CellIdentifier = "Cell";
+		List<Language> languages = new List<Language> ();
+		readonly MasterViewController controller;
+
+
+		public DataSource (MasterViewController controller)
 		{
-			static readonly NSString CellIdentifier = new NSString ("Cell");
-			readonly List<object> objects = new List<object> ();
-			readonly MasterViewController controller;
+			this.controller = controller;
 
-			public DataSource (MasterViewController controller)
-			{
-				this.controller = controller;
-			}
+			GetLanguagesFromXML ("languages.xml");
+		}
 
-			public IList<object> Objects {
-				get { return objects; }
-			}
 
-			// Customize the number of sections in the table view.
-			public override nint NumberOfSections (UITableView tableView)
-			{
-				return 1;
-			}
+		// Customize the number of sections in the table view.
+		public override nint NumberOfSections (UITableView tableView)
+		{
+			return 1;
+		}
 
-			public override nint RowsInSection (UITableView tableview, nint section)
-			{
-				return objects.Count;
-			}
+		public override nint RowsInSection (UITableView tableview, nint section)
+		{
+			return languages.Count;
+		}
 
-			// Customize the appearance of table view cells.
-			public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
-			{
-				var cell = tableView.DequeueReusableCell (CellIdentifier, indexPath);
+		// Customize the appearance of table view cells.
+		public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
+		{
+			var cell = tableView.DequeueReusableCell (CellIdentifier, indexPath);
 
-				cell.TextLabel.Text = objects [indexPath.Row].ToString ();
+			cell.TextLabel.Text = languages [indexPath.Row].Name;
 
-				return cell;
-			}
+			return cell;
+		}
 
-			public override bool CanEditRow (UITableView tableView, NSIndexPath indexPath)
-			{
-				// Return false if you do not want the specified item to be editable.
-				return true;
-			}
+		public Language GetItem (int id)
+		{
+			return languages [id];
+		}
 
-			public override void CommitEditingStyle (UITableView tableView, UITableViewCellEditingStyle editingStyle, NSIndexPath indexPath)
-			{
-				if (editingStyle == UITableViewCellEditingStyle.Delete) {
-					// Delete the row from the data source.
-					objects.RemoveAt (indexPath.Row);
-					controller.TableView.DeleteRows (new [] { indexPath }, UITableViewRowAnimation.Fade);
-				} else if (editingStyle == UITableViewCellEditingStyle.Insert) {
-					// Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+
+		public override bool CanEditRow (UITableView tableView, NSIndexPath indexPath)
+		{
+			// Return false if you do not want the specified item to be editable.
+			return false;
+		}
+
+		//			public override void CommitEditingStyle (UITableView tableView, UITableViewCellEditingStyle editingStyle, NSIndexPath indexPath)
+		//			{
+		//				if (editingStyle == UITableViewCellEditingStyle.Delete) {
+		//					// Delete the row from the data source.
+		//					objects.RemoveAt (indexPath.Row);
+		//					controller.TableView.DeleteRows (new [] { indexPath }, UITableViewRowAnimation.Fade);
+		//				} else if (editingStyle == UITableViewCellEditingStyle.Insert) {
+		//					// Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.
+		//				}
+		//			}
+
+		public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
+		{
+			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad)
+				controller.DetailViewController.SetDetailItem (languages [indexPath.Row]);
+		}
+			
+		/// <summary>
+		/// This method parses the xml file lanuages.xml
+		/// </summary>
+		/// <param name="path">Path.</param>
+		private void GetLanguagesFromXML (string path)
+		{
+			XmlTextReader reader = new XmlTextReader (path);
+			Language currentLanguage = null;
+			while (reader.Read ()) {
+				if (reader.NodeType == XmlNodeType.Element && reader.Name == "LANGUAGE") {
+					currentLanguage = new Language ();
+				} else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == "LANGUAGE") {
+					languages.Add (currentLanguage);
+				} else {
+					switch (reader.Name) {
+					case "NAME":
+						currentLanguage.Name = reader.ReadElementContentAsString ();
+						break;
+					case "YEAR":
+						currentLanguage.Year = reader.ReadElementContentAsString ();
+						break;
+					case "URL":
+						currentLanguage.Url = reader.ReadElementContentAsString ();
+						break;
+					}
 				}
-			}
-
-			public override void RowSelected (UITableView tableView, NSIndexPath indexPath)
-			{
-				if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad)
-					controller.DetailViewController.SetDetailItem (objects [indexPath.Row]);
 			}
 		}
 	}
 }
-
 

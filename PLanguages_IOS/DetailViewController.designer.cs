@@ -14,8 +14,16 @@ namespace PLanguages_IOS
 	[Register ("DetailViewController")]
 	partial class DetailViewController
 	{
+		[Outlet]
+		[GeneratedCode ("iOS Designer", "1.0")]
+		UILabel detailDescriptionLabel { get; set; }
+
 		void ReleaseDesignerOutlets ()
 		{
+			if (detailDescriptionLabel != null) {
+				detailDescriptionLabel.Dispose ();
+				detailDescriptionLabel = null;
+			}
 		}
 	}
 }
