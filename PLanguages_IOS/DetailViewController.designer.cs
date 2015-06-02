@@ -18,11 +18,19 @@ namespace PLanguages_IOS
 		[GeneratedCode ("iOS Designer", "1.0")]
 		UILabel detailDescriptionLabel { get; set; }
 
+		[Outlet]
+		[GeneratedCode ("iOS Designer", "1.0")]
+		UIWebView detailWebView { get; set; }
+
 		void ReleaseDesignerOutlets ()
 		{
 			if (detailDescriptionLabel != null) {
 				detailDescriptionLabel.Dispose ();
 				detailDescriptionLabel = null;
+			}
+			if (detailWebView != null) {
+				detailWebView.Dispose ();
+				detailWebView = null;
 			}
 		}
 	}
